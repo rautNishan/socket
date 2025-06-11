@@ -1,6 +1,7 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { BaseUserEntity } from "../../../common/database/base/entities/base.user.entity";
 import { IUser } from "../interface/user.interface";
+import { MessagesEntity } from "../../messages/entity/messages.entity";
 
 export const UserEntityName = "users";
 @Entity({
@@ -23,4 +24,7 @@ export class UserEntity extends BaseUserEntity implements IUser {
     default: null,
   })
   contact: string;
+
+  @OneToMany(() => MessagesEntity, (message) => message.from)
+  messages: MessagesEntity;
 }
