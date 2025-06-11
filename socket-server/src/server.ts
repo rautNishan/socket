@@ -6,9 +6,8 @@ import appConfig from "./common/configs/app.config";
 import { DBConnection } from "./common/database/connection/database.connection";
 import { GlobalExceptionFilter } from "./common/response/errors/global.filter.error";
 import { ResponseInterCeptor } from "./common/response/interceptors/response.interceptor";
-import { AdminIndexRouter } from "./routes/admin/admin.index.route";
-import { UserIndexRoute } from "./routes/user/user.index.route";
-import { initializeSwaggerOptions } from "./swagger";
+import { UserSelfRoute } from "./routes/user/router/user.route";
+import { UserAuthRoute } from "./routes/user/router/user.auth.route";
 
 export async function main() {
   try {
@@ -24,14 +23,14 @@ export async function main() {
       host: host,
       beforeRouteMiddlewares: [cors(), express.json(), ResponseInterCeptor],
       routes: [
-        { routeName: "/admin", router: AdminIndexRouter.getAdminRouter() },
-        { routeName: "/user", router: UserIndexRoute.getUserRouter() },
+        { routeName: "/user", router: UserSelfRoute.getUserSelfRouter() },
+        { routeName: "/user/auth", router: UserAuthRoute.getUserAuthRouter() },
       ],
       afterRouteMiddleWares: [GlobalExceptionFilter],
     });
 
     //Swagger
-    initializeSwaggerOptions(app);
+    // initializeSwaggerOptions(app);
   } catch (err) {
     console.log("This is Error in Server: ", err);
     throw err;

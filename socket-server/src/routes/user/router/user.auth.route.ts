@@ -11,7 +11,7 @@ export class UserAuthRoute {
   static userAuthRouter: Router = express.Router();
 
   public static getUserAuthRouter(): Router {
-    UserAuthRoute.login("/auth/login");
+    UserAuthRoute.login("/login");
     return UserAuthRoute.userAuthRouter;
   }
 
