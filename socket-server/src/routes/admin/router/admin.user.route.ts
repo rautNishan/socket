@@ -6,6 +6,7 @@ import { RequestBodyValidation } from "../../../common/request/validator/request
 import { UserCreateDto } from "../../../modules/users/dtos/user.create.dto";
 import { asyncHandler } from "../../../utils/async.handler";
 import { AdminUserRegisterDoc } from "../../../modules/users/docs/admin/admin.user.doc";
+import { UserProtectedGuard } from "../../../common/request/guards/authenticated.user";
 
 export class AdminUserRoute {
   constructor() {}

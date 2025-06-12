@@ -40,6 +40,22 @@ export class BaseRepository<T extends DataBaseBaseEntity>
     return await this._repo.save(entityInstance);
   }
 
+  async bulkCreate(
+    createData: DeepPartial<T>[],
+    options?: ICreateOptions
+  ): Promise<T[]> {
+    if (options?.entityManager) {
+      const entityInstances = options.entityManager.create(
+        this._repo.target,
+        createData
+      );
+      return await options.entityManager.save(entityInstances);
+    }
+
+    const entityInstances = this._repo.create(createData);
+    return await this._repo.save(entityInstances);
+  }
+
   async update(
     updateData: DeepPartial<T>,
     options?: IUpdateOptions
@@ -160,5 +176,9 @@ export class BaseRepository<T extends DataBaseBaseEntity>
       return await options.entityManage.remove(entity);
     }
     return await this._repo.remove(entity);
+  }
+
+  createQueryBuilder(alias: string) {
+    return this._repo.createQueryBuilder(alias);
   }
 }

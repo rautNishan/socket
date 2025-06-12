@@ -40,6 +40,14 @@ export class AuthService implements IAuth {
     return AuthService._instance;
   }
 
+  async authMe(id: number) {
+    const existingUser = await this._userRepository.getById(id);
+    if (!existingUser) {
+      throw new HttpException(HttpStatusCode.NOT_FOUND, "User not found");
+    }
+    return existingUser;
+  }
+
   async login(incomingData: ILoginIncomingData): Promise<string> {
     try {
       const validUser: UserEntity = await this.verifyValidUser(incomingData);

@@ -10,4 +10,8 @@ export class AuthUserController {
   async login(data: UserLoginDto) {
     return await this._authService.login(data);
   }
+
+  async authMe(id: number) {
+    return await this._authService.authMe(id);
+  }
 }

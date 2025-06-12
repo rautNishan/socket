@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { BaseUserEntity } from "../../../common/database/base/entities/base.user.entity";
 import { IUser } from "../interface/user.interface";
 import { MessagesEntity } from "../../messages/entity/messages.entity";
+import { MembersEntity } from "../../members/entity/members.entity";
 
 export const UserEntityName = "users";
 @Entity({
@@ -26,5 +27,8 @@ export class UserEntity extends BaseUserEntity implements IUser {
   contact: string;
 
   @OneToMany(() => MessagesEntity, (message) => message.from)
-  messages: MessagesEntity;
+  messages: MessagesEntity[];
+
+  @OneToMany(() => MembersEntity, (member) => member.userId)
+  members: MembersEntity[];
 }

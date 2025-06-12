@@ -2,9 +2,10 @@ import { Express } from "express";
 
 import { IAppOptions } from "./common/interfaces/app.interface";
 import { ICustomRouter } from "./common/interfaces/router.interface";
+import http from "http";
 export class AppInit {
   private app: Express;
-
+  private server: http.Server;
   private port: number;
 
   private host: string;
@@ -18,9 +19,9 @@ export class AppInit {
     this.initializeRoutes(options.routes);
 
     this.initializeMiddlewares(options.afterRouteMiddleWares);
-
-    this.app.listen(this.port, this.host, () => {
-      console.log(`Listing to port ${this.port} and host ${this.host}`);
+    this.server = http.createServer(this.app);
+    this.server.listen(this.port, this.host, () => {
+      console.log(`Listening to port ${this.port} and host ${this.host}`);
     });
   }
 
@@ -37,6 +38,13 @@ export class AppInit {
     });
   }
 
+  public getServer() {
+    return this.server;
+  }
+
+  public getApp() {
+    return this.app;
+  }
   //For Static content
   // private initializeStaticContent() {
   //   this.app.use();

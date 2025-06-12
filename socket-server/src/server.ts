@@ -8,7 +8,8 @@ import { GlobalExceptionFilter } from "./common/response/errors/global.filter.er
 import { ResponseInterCeptor } from "./common/response/interceptors/response.interceptor";
 import { UserSelfRoute } from "./routes/user/router/user.route";
 import { UserAuthRoute } from "./routes/user/router/user.auth.route";
-
+import { ChatRoute } from "./routes/chat/router/chat.route";
+import { Server as SocketIOServer } from "socket.io";
 export async function main() {
   try {
     const app: Express = express();
@@ -17,7 +18,7 @@ export async function main() {
 
     await DBConnection.connection();
 
-    new AppInit({
+    const appInit = new AppInit({
       app: app,
       port: port,
       host: host,
@@ -25,12 +26,52 @@ export async function main() {
       routes: [
         { routeName: "/user", router: UserSelfRoute.getUserSelfRouter() },
         { routeName: "/user/auth", router: UserAuthRoute.getUserAuthRouter() },
+        { routeName: "/chat", router: ChatRoute.getChatRoute() },
       ],
       afterRouteMiddleWares: [GlobalExceptionFilter],
     });
 
-    //Swagger
-    // initializeSwaggerOptions(app);
+    const io = new SocketIOServer(appInit.getServer(), {
+      cors: {
+        origin: "*", // Or restrict to your frontend URL
+        methods: ["GET", "POST"],
+      },
+    });
+
+    // Handle socket connection
+    io.on("connection", (socket) => {
+      console.log("New client connected: ", socket.id);
+      // Listen for joining a room
+      socket.on("joinRoom", (roomId: number) => {
+        console.log(`Socket ${socket.id} joining room ${roomId}`);
+        socket.join(String(roomId));
+      });
+
+      // Listen for sending messages
+      socket.on(
+        "sendMessage",
+        async (data: { roomId: number; message: string; senderId: number }) => {
+          console.log("Received message: ", data);
+
+          // TODO: Save message to DB here, with your ORM or query builder
+          // For example:
+          // const savedMessage = await MessageModel.create({...})
+
+          // For now, just broadcast to the room
+          io.to(String(data.roomId)).emit("newMessage", {
+            id: Date.now(),
+            message: data.message,
+            from: { id: data.senderId, name: "User" }, // Replace with real user data
+            createdAt: new Date(),
+            roomId: data.roomId,
+          });
+        }
+      );
+
+      socket.on("disconnect", () => {
+        console.log("Client disconnected: ", socket.id);
+      });
+    });
   } catch (err) {
     console.log("This is Error in Server: ", err);
     throw err;

@@ -6,12 +6,15 @@ import { AuthUserController } from "../../../modules/auth/controllers/auth.user.
 import { UserLoginDto } from "../../../modules/auth/dtos/user.login.dto";
 import { ValidationException } from "../../../common/exceptions/validation.exception";
 import { HttpStatusCode } from "../../../common/constants/http.status.code.constant";
+import { UserProtectedGuard } from "../../../common/request/guards/authenticated.user";
+import { REQUEST_META } from "../../../common/request/constants/request.constant";
 
 export class UserAuthRoute {
   static userAuthRouter: Router = express.Router();
 
   public static getUserAuthRouter(): Router {
     UserAuthRoute.login("/login");
+    UserAuthRoute.authMe("/auth-me");
     return UserAuthRoute.userAuthRouter;
   }
 
@@ -30,6 +33,24 @@ export class UserAuthRoute {
           );
         }
         const data = await authUserController.login(req.body);
+        res.json(data);
+      })
+    );
+  }
+
+  public static authMe(path: string): Router {
+    const authUserController: AuthUserController = new AuthUserController();
+    return this.userAuthRouter.get(
+      path,
+      UserProtectedGuard,
+      asyncHandler(async (req: Request, res: Response) => {
+        const id = Number(req[REQUEST_META.PROTECTED_USER]);
+        const incomingData = await authUserController.authMe(id);
+        const data = {
+          id: incomingData.id,
+          name: incomingData.userName,
+          email: incomingData.email,
+        };
         res.json(data);
       })
     );

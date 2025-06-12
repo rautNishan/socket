@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from "typeorm";
 import { DataBaseBaseEntity } from "../../../common/database/base/entities/base.entity";
 import { MessagesEntity } from "../../messages/entity/messages.entity";
+import { MembersEntity } from "../../members/entity/members.entity";
 
 export const RoomEntityName = "rooms";
 @Entity({
@@ -16,5 +17,8 @@ export class RoomEntity extends DataBaseBaseEntity {
   type: string;
 
   @OneToMany(() => MessagesEntity, (message) => message.roomId)
-  messages: MessagesEntity;
+  messages: MessagesEntity[];
+
+  @OneToMany(() => MembersEntity, (member) => member.roomId)
+  members: MembersEntity[];
 }

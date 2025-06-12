@@ -30,7 +30,6 @@ export class MessagesService {
     this._messagesRepository = new MessagesRepository(_repo);
     const _roomRepo: Repository<RoomEntity> =
       DBConnection.getConnection().getRepository(RoomEntity);
-
     this._roomRepository = new RoomRepository(_roomRepo);
   }
 
