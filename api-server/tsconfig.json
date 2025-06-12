@@ -4,7 +4,7 @@
     "module": "commonjs",
     "forceConsistentCasingInFileNames": false,
     "skipLibCheck": true,
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "./dist",
     "strictNullChecks": true,
     "esModuleInterop": true,
@@ -17,6 +17,6 @@
     "resolveJsonModule": true
     // "incremental": true,
   },
-  "include": ["./**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

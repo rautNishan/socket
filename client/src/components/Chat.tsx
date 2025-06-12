@@ -11,11 +11,11 @@ interface User {
 }
 
 interface Message {
-  id: number;
+  // id: number;s
   message: string;
-  from: User;
-  createdAt?: string;
-  roomId?: number; // add this for real-time
+  from: { id: number };
+  // createdAt?: string;
+  roomId?: number;
 }
 
 interface Room {
@@ -115,7 +115,7 @@ export const ChatApp: React.FC = () => {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    socketRef.current = io("http://localhost:3000", {
+    socketRef.current = io("http://localhost:3002", {
       auth: {
         token: getToken(),
       },
@@ -126,11 +126,13 @@ export const ChatApp: React.FC = () => {
     socket.on("connect", () => {
       console.log("Connected to socket server", socket.id);
       if (selectedRoomId) {
-        socket.emit("joinRoom", selectedRoomId);
+        socket.emit("JOIN_ROOM", selectedRoomId);
       }
     });
 
-    socket.on("newMessage", (message: Message) => {
+    socket.on("NEW_MESSAGE", (message: Message) => {
+      console.log("This is message: ", message);
+
       setRooms((prevRooms) =>
         prevRooms.map((room) =>
           room.id === message.roomId
@@ -154,7 +156,7 @@ export const ChatApp: React.FC = () => {
   useEffect(() => {
     const socket = socketRef.current;
     if (socket && selectedRoomId) {
-      socket.emit("joinRoom", selectedRoomId);
+      socket.emit("JOIN_ROOM", selectedRoomId);
     }
   }, [selectedRoomId]);
 
@@ -175,6 +177,7 @@ export const ChatApp: React.FC = () => {
       console.error("Socket not connected");
       return;
     }
+    console.log("This is room: ", selectedRoom);
 
     const msgToSend = {
       roomId: selectedRoom.id,
@@ -182,14 +185,12 @@ export const ChatApp: React.FC = () => {
       senderId: currentUser.id,
     };
 
-    socket.emit("sendMessage", msgToSend);
+    socket.emit("SEND_MESSAGES", msgToSend);
 
     // Optimistically update UI while waiting for server
     const newMsg: Message = {
-      id: Date.now(),
       message: newMessage.trim(),
       from: currentUser,
-      createdAt: new Date().toISOString(),
       roomId: selectedRoom.id,
     };
 
@@ -279,10 +280,9 @@ export const ChatApp: React.FC = () => {
                 </p>
               )}
               {selectedRoom.messages.map((msg) => {
-                const isCurrentUser = msg.from.email === currentUser.email;
+                const isCurrentUser = msg.from.id === currentUser.id;
                 return (
                   <div
-                    key={msg.id}
                     className={`max-w-xs md:max-w-md px-4 py-2 rounded-lg break-words ${
                       isCurrentUser
                         ? "bg-blue-500 text-white self-end rounded-br-none"
@@ -294,19 +294,14 @@ export const ChatApp: React.FC = () => {
                   >
                     {!isCurrentUser && (
                       <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-sm">
-                        {msg.from.name?.[0]?.toUpperCase() ?? "?"}
+                        {"?"}
                       </div>
                     )}
                     <div>
                       <p>{msg.message}</p>
-                      {msg.createdAt && (
-                        <span className="text-xs text-gray-300 block mt-1 text-right">
-                          {new Date(msg.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      )}
+                      {
+                        <span className="text-xs text-gray-300 block mt-1 text-right"></span>
+                      }
                     </div>
                   </div>
                 );

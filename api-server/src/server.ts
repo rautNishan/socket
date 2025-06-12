@@ -31,47 +31,45 @@ export async function main() {
       afterRouteMiddleWares: [GlobalExceptionFilter],
     });
 
-    const io = new SocketIOServer(appInit.getServer(), {
+    const io: SocketIOServer = new SocketIOServer(appInit.getServer(), {
       cors: {
         origin: "*", // Or restrict to your frontend URL
         methods: ["GET", "POST"],
       },
     });
 
-    // Handle socket connection
-    io.on("connection", (socket) => {
-      console.log("New client connected: ", socket.id);
-      // Listen for joining a room
-      socket.on("joinRoom", (roomId: number) => {
-        console.log(`Socket ${socket.id} joining room ${roomId}`);
-        socket.join(String(roomId));
-      });
+    // // Handle socket connection
+    // io.on("connection", (socket) => {
+    //   console.log("New client connected: ", socket.id);
+    //   // Listen for joining a room
+    //   socket.on("joinRoom", (roomId: number) => {
+    //     console.log(`Socket ${socket.id} joining room ${roomId}`);
+    //     socket.join(String(roomId));
+    //   });
 
-      // Listen for sending messages
-      socket.on(
-        "sendMessage",
-        async (data: { roomId: number; message: string; senderId: number }) => {
-          console.log("Received message: ", data);
+    //   // Listen for sending messages
+    //   socket.on(
+    //     "sendMessage",
+    //     async (data: { roomId: number; message: string; senderId: number }) => {
+    //       console.log("Received message: ", data);
 
-          // TODO: Save message to DB here, with your ORM or query builder
-          // For example:
-          // const savedMessage = await MessageModel.create({...})
+    //       // TODO: Save message to DB here, with your ORM or query builder
 
-          // For now, just broadcast to the room
-          io.to(String(data.roomId)).emit("newMessage", {
-            id: Date.now(),
-            message: data.message,
-            from: { id: data.senderId, name: "User" }, // Replace with real user data
-            createdAt: new Date(),
-            roomId: data.roomId,
-          });
-        }
-      );
+    //       // For now, just broadcast to the room
+    //       io.to(String(data.roomId)).emit("newMessage", {
+    //         id: Date.now(),
+    //         message: data.message,
+    //         from: { id: data.senderId, name: "User" }, // Replace with real user data
+    //         createdAt: new Date(),
+    //         roomId: data.roomId,
+    //       });
+    //     }
+    //   );
 
-      socket.on("disconnect", () => {
-        console.log("Client disconnected: ", socket.id);
-      });
-    });
+    //   socket.on("disconnect", () => {
+    //     console.log("Client disconnected: ", socket.id);
+    //   });
+    // });
   } catch (err) {
     console.log("This is Error in Server: ", err);
     throw err;
