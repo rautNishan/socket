@@ -3,6 +3,7 @@ import { AppInit } from "./app";
 
 import { Server as SocketIOServer } from "socket.io";
 import { SocketServer } from "./socket";
+import { RabbitMQ } from "./brokers/rabbitmq/rabbitmq";
 export async function main() {
   try {
     const app: Express = express();
@@ -23,6 +24,7 @@ export async function main() {
     });
     const socket = new SocketServer(io);
     socket.init();
+    await RabbitMQ.connection();
   } catch (err) {
     console.log("This is Error in Server: ", err);
     throw err;

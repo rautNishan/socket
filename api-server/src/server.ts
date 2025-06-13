@@ -10,6 +10,8 @@ import { UserSelfRoute } from "./routes/user/router/user.route";
 import { UserAuthRoute } from "./routes/user/router/user.auth.route";
 import { ChatRoute } from "./routes/chat/router/chat.route";
 import { Server as SocketIOServer } from "socket.io";
+import { RabbitMQ } from "./common/brokers/rabbitmq/rabbitmq";
+import { ChatService } from "./modules/chat/services/chat.service";
 export async function main() {
   try {
     const app: Express = express();
@@ -38,6 +40,29 @@ export async function main() {
       },
     });
 
+    await RabbitMQ.connection();
+
+    const rabbitMq = new RabbitMQ();
+    const chatService = new ChatService();
+    rabbitMq.consume(
+      "new_message",
+      "fanout",
+      "socket_server_1",
+      async (data) => {
+        console.log("This is data in consume: ", data);
+        const content = data.content.toString();
+        const msg: {
+          roomId: number;
+          message: string;
+          senderId: number;
+        } = JSON.parse(content);
+        await chatService.sendMessage({
+          senderId: msg.senderId,
+          roomId: msg.roomId,
+          message: msg.message,
+        })
+      }
+    );
     // // Handle socket connection
     // io.on("connection", (socket) => {
     //   console.log("New client connected: ", socket.id);

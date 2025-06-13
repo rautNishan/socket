@@ -1,5 +1,6 @@
 import { Server as SocketIOServer } from "socket.io";
 import { SOCKET_CONSTANTS } from "./constants/socket.constatns";
+import { RabbitMQ } from "./brokers/rabbitmq/rabbitmq";
 
 export class SocketServer {
   private _io: SocketIOServer;
@@ -30,6 +31,9 @@ export class SocketServer {
           }) => {
             console.log("This is data: ", data);
             //Push to rabbit mq
+            const rabbitMq = new RabbitMQ();
+            await rabbitMq.publish("new_message", "fanout", data);
+
             this._io
               .to(String(data.roomId))
               .emit(SOCKET_CONSTANTS.NEW_MESSAGE, {

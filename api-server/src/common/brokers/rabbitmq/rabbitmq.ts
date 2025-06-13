@@ -80,7 +80,7 @@ export class RabbitMQ implements IBrokerInterface {
       await channel.prefetch(1);
 
       await channel.consume(queueName, callback, {
-        noAck: false,
+        noAck: true,
         ...options,
       });
     } catch (error) {
